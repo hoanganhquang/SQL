@@ -1,58 +1,116 @@
-use test;
--- CREATE TABLE students (
+-- use test;
+-- CREATE TABLE reviewers (
 --     id INT AUTO_INCREMENT PRIMARY KEY,
---     first_name VARCHAR(100)
+--     first_name VARCHAR(100),
+--     last_name VARCHAR(100)
 -- );
 
-
--- CREATE TABLE papers (
+-- CREATE TABLE series(
+--     id INT AUTO_INCREMENT PRIMARY KEY,
 --     title VARCHAR(100),
---     grade INT,
---     student_id INT,
---     FOREIGN KEY (student_id) 
---         REFERENCES students(id)
---         ON DELETE CASCADE
+--     released_year YEAR(4),
+--     genre VARCHAR(100)
 -- );
 
--- INSERT INTO students (first_name) VALUES 
--- ('Caleb'), 
--- ('Samantha'), 
--- ('Raj'), 
--- ('Carlos'), 
--- ('Lisa');
+-- CREATE TABLE reviews (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     rating DECIMAL(2,1),
+--     series_id INT,
+--     reviewer_id INT,
+--     FOREIGN KEY(series_id) REFERENCES series(id),
+--     FOREIGN KEY(reviewer_id) REFERENCES reviewers(id)
+-- );
 
--- INSERT INTO papers (student_id, title, grade ) VALUES
--- (1, 'My First Book Report', 60),
--- (1, 'My Second Book Report', 75),
--- (2, 'Russian Lit Through The Ages', 94),
--- (2, 'De Montaigne and The Art of The Essay', 98),
--- (4, 'Borges and Magical Realism', 89);
+-- INSERT INTO series (title, released_year, genre) VALUES
+--     ('Archer', 2009, 'Animation'),
+--     ('Arrested Development', 2003, 'Comedy'),
+--     ("Bob's Burgers", 2011, 'Animation'),
+--     ('Bojack Horseman', 2014, 'Animation'),
+--     ("Breaking Bad", 2008, 'Drama'),
+--     ('Curb Your Enthusiasm', 2000, 'Comedy'),
+--     ("Fargo", 2014, 'Drama'),
+--     ('Freaks and Geeks', 1999, 'Comedy'),
+--     ('General Hospital', 1963, 'Drama'),
+--     ('Halt and Catch Fire', 2014, 'Drama'),
+--     ('Malcolm In The Middle', 2000, 'Comedy'),
+--     ('Pushing Daisies', 2007, 'Comedy'),
+--     ('Seinfeld', 1989, 'Comedy'),
+--     ('Stranger Things', 2016, 'Drama');
 
 
--- select first_name,
--- ifnull(title, 'MISSING'),
--- ifnull(grade, 0)
--- from students left join papers
--- on students.id = papers.student_id;
+-- INSERT INTO reviewers (first_name, last_name) VALUES
+--     ('Thomas', 'Stoneman'),
+--     ('Wyatt', 'Skaggs'),
+--     ('Kimbra', 'Masters'),
+--     ('Domingo', 'Cortes'),
+--     ('Colt', 'Steele'),
+--     ('Pinkie', 'Petit'),
+--     ('Marlon', 'Crafford');
+--     
 
--- SELECT
---     first_name,
---     IFNULL(AVG(grade), 0) AS average
--- FROM students
--- LEFT JOIN papers
---     ON students.id = papers.student_id
--- GROUP BY students.id
--- ORDER BY average DESC;
+-- INSERT INTO reviews(series_id, reviewer_id, rating) VALUES
+--     (1,1,8.0),(1,2,7.5),(1,3,8.5),(1,4,7.7),(1,5,8.9),
+--     (2,1,8.1),(2,4,6.0),(2,3,8.0),(2,6,8.4),(2,5,9.9),
+--     (3,1,7.0),(3,6,7.5),(3,4,8.0),(3,3,7.1),(3,5,8.0),
+--     (4,1,7.5),(4,3,7.8),(4,4,8.3),(4,2,7.6),(4,5,8.5),
+--     (5,1,9.5),(5,3,9.0),(5,4,9.1),(5,2,9.3),(5,5,9.9),
+--     (6,2,6.5),(6,3,7.8),(6,4,8.8),(6,2,8.4),(6,5,9.1),
+--     (7,2,9.1),(7,5,9.7),
+--     (8,4,8.5),(8,2,7.8),(8,6,8.8),(8,5,9.3),
+--     (9,2,5.5),(9,3,6.8),(9,4,5.8),(9,6,4.3),(9,5,4.5),
+--     (10,5,9.9),
+--     (13,3,8.0),(13,4,7.2),
+--     (14,2,8.5),(14,3,8.9),(14,4,8.9);
 
-select first_name, 
-	ifnull(avg(grade), 0) as average,
-    case 
-		when avg(grade) >= 75 then 'PASSING'
-        when avg(grade) < 75 then 'MISSING'
-        else 'MISSING'
-        end as 'passing_status'
-from students left join papers
-on students.id = papers.student_id
-group by students.id
-order by average desc
+-- select * from series;
+-- select * from reviews;
+-- select * from reviewers;
+
+-- challenge 1
+select title, rating 
+from series join reviews 
+on series.id = reviews.series_id;
+
+-- challenge 2
+select title, avg(rating) as 'avg_rating'
+from series join reviews
+on series.id = reviews.series_id
+group by reviews.series_id
+order by avg_rating;
+
+-- challenge 3
+select first_name, last_name, rating
+from reviewers join reviews
+on reviewers.id = reviews.reviewer_id;
+
+-- challenge 4
+select title as unreviewed_series
+from series left join reviews
+on series.id = reviews.series_id
+where reviews.series_id is null;
+
+-- challenge 5
+select genre, avg(rating) as avg_rating
+from series join reviews
+on series.id = reviews.series_id
+group by series.genre;
+
+-- challenge 6
+select first_name, last_name, count(reviews.reviewer_id) as 'COUNT', ifnull(rating, 0) as 'MIN', ifnull(rating, 0) as 'MAX', ifnull(rating, 0) as 'AVG', 
+case
+when rating is null then 'INACTIVE'
+when count(rating) >= 10 then 'POWER USER'
+else 'ACTIVE'
+end as 'STATUS'
+from reviewers left join reviews
+on reviewers.id = reviews.reviewer_id
+group by reviews.reviewer_id;
+
+-- challenge 7
+select title, rating, concat(first_name, ' ', last_name) as 'reviewer'
+from reviews, series, reviewers
+where series.id = reviews.series_id = reviewers.id
+
+
+
 
