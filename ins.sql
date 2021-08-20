@@ -86,10 +86,33 @@ on users.id = photos.user_id
 where user_id is null;
 
 -- challenge 4
-select photo_id, count(user_id) as 'Total'
-from likes
+select username, photo_id, image_url, count(*) as 'Total'
+from photos
+inner join users on photos.user_id = users.id
+inner join likes on photos.id = likes.photo_id
 group by photo_id
 order by Total desc;
+
+-- challenge 5
+SELECT (SELECT Count(*) 
+        FROM   photos) / (SELECT Count(*) 
+                          FROM   users) AS avg;
+                          
+-- challenge 6
+select tag_name as 'Top 5 most hashtags commonly used'
+from tags
+inner join photo_tags on tags.id = photo_tags.tag_id
+group by tags.id
+order by count(photo_tags.photo_id) desc limit 5;
+
+-- challenge 7
+select username as 'Users have likes every single photo'
+from likes
+inner join users on likes.user_id = users.id
+group by user_id
+having count(likes.user_id) = (select count(*) from photos)
+;
+
 
 
 
